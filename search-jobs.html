@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Jobs - Job Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        /* Search Form */
+        #searchForm {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+
+        #searchForm input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        #searchForm button {
+            width: 100%;
+            padding: 15px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 77, 77, 0.5);
+        }
+
+        #searchForm button:hover {
+            background-color: #ff1a1a;
+            transform: scale(1.05);
+        }
+
+        /* Autocomplete Suggestions */
+        .autocomplete-suggestions {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1000;
+            width: calc(100% - 22px);
+        }
+
+        .autocomplete-suggestions div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestions div:hover {
+            background-color: #f4f4f9;
+        }
+
+        /* Job Listings */
+        #results {
+            margin-top: 20px;
+        }
+
+        .job {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .job h3 {
+            margin: 0;
+            color: #007bff;
+            font-size: 1.5rem;
+        }
+
+        .job p {
+            margin: 10px 0;
+            color: #555;
+        }
+
+        .job strong {
+            color: #333;
+        }
+
+        /* Pagination */
+        .pagination {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pagination a {
+            padding: 10px 15px;
+            background-color: #ff4d4d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 77, 77, 0.5);
+        }
+
+        .pagination a:hover {
+            background-color: #ff1a1a;
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            #searchForm input {
+                width: calc(100% - 20px);
+            }
+
+            .job h3 {
+                font-size: 1.2rem;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+            }
+
+            .pagination a {
+                padding: 8px 12px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            text-align: left;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .submit-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: background 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+
+        /* Results count display */
+        .results-count {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            color: #333;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Job count display */
+        .results-count {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .job-card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .job-header h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .job-details {
+            margin: 15px 0;
+        }
+
+        .location {
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .description {
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .job-footer {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .apply-btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background 0.2s ease;
+            width: 80%;
+            text-align: center;
+        }
+
+        .apply-btn:hover {
+            background: #0056b3;
+        }
+
+        .no-results, .error-message {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px;
+            color: #666;
+        }
+
+        /* Icons styling */
+        .fas {
+            margin-right: 8px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search Jobs</h1>
+
+        <!-- Search Form -->
+        <div class="search-section">
+            <form id="searchForm">
+                <div class="search-container">
+                    <input type="text" id="keywordSearch" placeholder="Enter job title...">
+                </div>
+                <div class="search-container">
+                    <input type="text" id="locationSearch" placeholder="Enter location...">
+                </div>
+                <button type="submit" class="search-btn">Search Jobs</button>
+            </form>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+        
+        <!-- Add this container for the results -->
+        <div class="results-container" id="searchResults"></div>
+        
+    <script src="js/search-autocomplete.js"></script>
+    <script>
+        // Initialize autocomplete for both fields
+        setupAutocomplete('keywordSearch', 'keyword');
+        setupAutocomplete('locationSearch', 'location');
+    </script>
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchForm = document.getElementById('searchForm');
+            const resultsContainer = document.getElementById('searchResults');
+            const keywordInput = document.getElementById('keywordSearch');
+            const locationInput = document.getElementById('locationSearch');
+            const applicationModal = document.getElementById('applicationModal');
+            const applicationForm = document.getElementById('applicationForm');
+            const modalJobTitle = document.getElementById('modalJobTitle');
+            const jobIdInput = document.getElementById('jobId');
+            const closeModalBtn = document.querySelector('.close-modal');
+// Handle application form submission
+applicationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(applicationForm);
+    const jobId = formData.get('jobId');
+    const applicantName = formData.get('applicantName');
+    const applicantEmail = formData.get('applicantEmail');
+    const applicationMessage = formData.get('applicationMessage');
+    
+    const requestData = {
+        jobId,
+        applicantName,
+        applicantEmail,
+        applicationMessage
+    };
+    
+    console.log('Sending application data:', requestData);
+    
+    try {
+        const response = await fetch('submit-application.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        console.log('Raw server response:', responseText);
+        
+        let result;
+        try {
+        const responseText = response.text();
+            result = JSON.parse(responseText);
+            alert('Your application has been submitted successfully!');
+            applicationModal.style.display = 'none';
+            applicationForm.reset();
+        } catch (parseError) {
+            console.error('Error parsing JSON response:', parseError);
+            alert('Error: ' + result.message);
+            alert('Server returned an invalid response. Please check server logs.');
+            return;
+        }
+        
+    } catch (error) {
+        console.error('Error submitting application:', error);
+        alert('An error occurred while submitting your application. Please try again.');
+    }
+});
+
+
+            // Add Font Awesome CSS for icons
+            const fontAwesome = document.createElement('link');
+            fontAwesome.rel = 'stylesheet';
+            fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+            document.head.appendChild(fontAwesome);
+
+            // Close modal when clicking the X
+            closeModalBtn.addEventListener('click', () => {
+                applicationModal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === applicationModal) {
+                    applicationModal.style.display = 'none';
+                }
+            });
+
+            // Function to open application modal
+            window.openApplicationModal = function(jobId, jobTitle) {
+                modalJobTitle.textContent = jobTitle;
+                jobIdInput.value = jobId;
+                applicationModal.style.display = 'block';
+            };
+
+            // Handle application form submission
+            applicationForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(applicationForm);
+                const jobId = formData.get('jobId');
+                const applicantName = formData.get('applicantName');
+                const applicantEmail = formData.get('applicantEmail');
+                const applicationMessage = formData.get('applicationMessage');
+                
+                try {
+                    const response = await fetch('submit-application.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            jobId,
+                            applicantName,
+                            applicantEmail,
+                            applicationMessage
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Your application has been submitted successfully!');
+                        applicationModal.style.display = 'none';
+                        applicationForm.reset();
+                    } else {
+                        alert('Error: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Error submitting application:', error);
+                    alert('An error occurred while submitting your application. Please try again.');
+                }
+            });
+
+            searchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const keyword = keywordInput.value.trim();
+                const location = locationInput.value.trim();
+
+                try {
+                    const response = await fetch(`search-jobs.php?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`);
+                    const data = await response.json();
+                    
+                    // Clear previous results
+                    resultsContainer.innerHTML = '';
+                    
+                    if (data.jobs && data.jobs.length > 0) {
+                        // Add job count display
+                        const countDisplay = document.createElement('div');
+                        countDisplay.className = 'results-count';
+                        countDisplay.innerHTML = `<i class="fas fa-list"></i> Found ${data.jobs.length} job${data.jobs.length > 1 ? 's' : ''} matching your search`;
+                        resultsContainer.appendChild(countDisplay);
+                        
+                        // Create wrapper for grid layout
+                        const gridWrapper = document.createElement('div');
+                        gridWrapper.className = 'results-grid';
+                        resultsContainer.appendChild(gridWrapper);
+
+                        data.jobs.forEach(job => {
+                            const jobCard = document.createElement('div');
+                            jobCard.className = 'job-card';
+                            jobCard.innerHTML = `
+                                <div class="job-header">
+                                    <h3><i class="fas fa-briefcase"></i> ${job.title}</h3>
+                                </div>
+                                <div class="job-details">
+                                    <p class="location"><i class="fas fa-map-marker-alt"></i> ${job.location}</p>
+                                    <p class="description"><i class="fas fa-info-circle"></i> ${job.description}</p>
+                                </div>
+                                <div class="job-footer">
+                                    <button class="apply-btn" data-job-id="${job.id}" data-job-title="${job.title}">
+                                        <i class="fas fa-paper-plane"></i> Apply Now
+                                    </button>
+                                </div>
+                            `;
+                            gridWrapper.appendChild(jobCard);
+                        });
+
+                        // Add event listeners to all apply buttons
+                        document.querySelectorAll('.apply-btn').forEach(button => {
+                            button.addEventListener('click', function() {
+                                const jobId = this.getAttribute('data-job-id');
+                                const jobTitle = this.getAttribute('data-job-title');
+                                openApplicationModal(jobId, jobTitle);
+                            });
+                        });
+                    } else {
+                        resultsContainer.innerHTML = '<div class="no-results"><i class="fas fa-search"></i> No jobs found</div>';
+                    }
+                } catch (error) {
+                    console.error('Error fetching jobs:', error);
+                    resultsContainer.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i> Error fetching results</div>';
+                }
+            });
+        });
+    </script>
+        
+    <!-- Application Modal -->
+    <div id="applicationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Apply for: <span id="modalJobTitle"></span></h2>
+            <form id="applicationForm">
+                <input type="hidden" id="jobId" name="jobId">
+                <div class="form-group">
+                    <label for="applicantName">Your Name</label>
+                    <input type="text" id="applicantName" name="applicantName" required>
+                </div>
+                <div class="form-group">
+                    <label for="applicantEmail">Your Email</label>
+                    <input type="email" id="applicantEmail" name="applicantEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="applicationMessage">Cover Letter / Message</label>
+                    <textarea id="applicationMessage" name="applicationMessage" rows="5" required 
+                        placeholder="Introduce yourself and explain why you're a good fit for this position..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Send Application</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
